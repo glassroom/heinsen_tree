@@ -30,7 +30,9 @@ labels_in_tree = tree.map_labels(labels)  # shape is [batch_sz, tree.n_levels]
 
 `pip install -e git+https://github.com/glassroom/heinsen_tree`
 
-Alternatively, you can download a single file to your project directory: [heinsen_tree.py](heinsen_tree/heinsen_tree.py). The only dependency is PyTorch.
+Alternatively, you can download a single file to your project directory: [heinsen_tree.py](heinsen_tree/heinsen_tree.py).
+
+The only dependency is PyTorch.
 
 
 ## How Does it Work?
