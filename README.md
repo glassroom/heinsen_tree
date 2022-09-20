@@ -26,20 +26,7 @@ scores_in_tree = tree.map_scores(scores)  # shape is [batch_sz, tree.n_levels, t
 labels_in_tree = tree.map_labels(labels)  # shape is [batch_sz, tree.n_levels]
 ```
 
-## Table of Contents
-
-* [Installing](#installing)
-
-* [How Does it Work?](#how-does-it-work?)
-
-* [Tips for Training and Inference](#tips-for-training-and-inference)
-
-* [Citing](#citing)
-
-* [Notes](#notes)
-
-
-## Installing
+### Installing
 
 `pip install -e git+https://github.com/glassroom/heinsen_tree`
 
