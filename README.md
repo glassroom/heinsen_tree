@@ -69,9 +69,9 @@ topk_valid_preds = tree.P[topk_idxs]                          # [batch_sz, k, tr
 In practice, we have found that weighting Levenshtein distances by path density at each level of depth works well:
 
 ```python
-dens_by_level = is_not_padding.float().mean(dim=-2, keepdim=True)                        # [1, tree.n_levels]
-topk_weighted_idxs = (lev_dists * dens_by_level).topk(k, largest=False, dim=-1).indices  # [batch_sz, k]
-topk_weighted_valid_preds = tree.P[topk_weighted_idxs]                                   # [batch_sz, k, tree.n_levels]
+dens = is_not_padding.float().mean(dim=-2, keepdim=True)                        # [1, tree.n_levels]
+topk_weighted_idxs = (lev_dists * dens).topk(k, largest=False, dim=-1).indices  # [batch_sz, k]
+topk_weighted_valid_preds = tree.P[topk_weighted_idxs]                          # [batch_sz, k, tree.n_levels]
 ```
 
 Standard beam search over the paths of `P` with the highest joint predicted probability at each level of depth works well too.
