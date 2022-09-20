@@ -26,7 +26,7 @@ scores_in_tree = tree.map_scores(scores)  # shape is [batch_sz, tree.n_levels, t
 labels_in_tree = tree.map_labels(labels)  # shape is [batch_sz, tree.n_levels]
 ```
 
-### Installing
+## Installing
 
 `pip install -e git+https://github.com/glassroom/heinsen_tree`
 
@@ -73,7 +73,6 @@ topk_weighted_valid_preds = tree.P[topk_weighted_idxs]                          
 ```
 
 Standard beam search over the paths of `P` with the highest joint predicted probability at each level of depth works well too.
-
 
 ## Citing
 
