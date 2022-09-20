@@ -12,7 +12,7 @@ from heinsen_tree import ClassTree  # PyTorch module, can be incorporated in mod
 class_names = [synset.name() for synset in wordnet.all_eng_synsets()]
 class_name_to_id = { name: i for i, name in enumerate(class_names) }
 paths_down_tree = [
-    [class_name_to_id[synset.name()] for synset in wordnet.synset(class_name).hypernym_paths()[0]]
+    [class_name_to_id[synset.name()] for synset in wordnet.synset(class_name).hypernym_paths()[-1]]
     for class_name in class_names
 ]
 tree = ClassTree(paths_down_tree)
