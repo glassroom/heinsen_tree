@@ -1,6 +1,6 @@
 # heinsen_tree
 
-Reference implementation of "Tree Methods for Hierarchical Classification in Parallel" (Heinsen, 2022), for transforming classification scores and labels, corresponding to given nodes in a semantic tree, to scores and labels corresponding to all nodes in the ancestral paths going down the tree to every given node -- efficiently, in parallel, and preserving gradient information.
+Reference implementation of "Tree Methods for Hierarchical Classification in Parallel" (Heinsen, 2022), for transforming classification scores and labels, corresponding to given nodes in a semantic tree, to scores and labels corresponding to all nodes in the ancestral paths going down the tree to every given node -- efficiently, in parallel.
 
 For example, here we apply our methods on a tree of all English-language synsets in WordNet 3.0, with 117,659 classes in 20 levels of depth, incurring negligible computation and consuming only a fixed ~0.04GB over the memory space occupied by data:
 
