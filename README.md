@@ -14,6 +14,7 @@ A toy example is worth more than a thousand words:
 >>> #         |                               +-- 5 "angry big dog"
 >>> #         +-- 1 "other"
 >>> #
+>>> import torch
 >>> from heinsen_tree import ClassTree
 >>> tree = ClassTree([[0], [1], [0, 2], [0, 3], [0, 3, 4], [0, 3, 5]])
 >>>
