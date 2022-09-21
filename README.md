@@ -98,7 +98,7 @@ pred_probs = scores_in_tree.softmax(dim=-1)  # [batch_sz, tree.n_levels, tree.n_
 
 We recommend that you map naive predicted probabilities at each level of depth to *paths that exist in the tree*, by restricting the space of allowed predictions to only those paths that are stored by `ClassTree` in a buffer named `P` (corresponding to matrix P in the paper).
 
-For example, here we predict the top k paths in the tree that have the smallest Levenshtein distance to each naively predicted path in the batch. The possible classes at each level of depth in a path are fixed, so we can compute Levenshtein distance efficiently by summing elementwise differences:
+For example, here we predict the top k paths in the tree that have the smallest Levenshtein distance to each naively predicted path in the batch. The possible classes at each level of depth in a path are fixed, so we can compute Levenshtein distance efficiently by summing elementwise differences between paths:
 
 ```python
 k = 5
