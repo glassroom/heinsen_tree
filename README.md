@@ -45,7 +45,7 @@ The only dependency is PyTorch.
 
 ## Sample Usage with WordNet
 
-As a more realistic application, let's instantiate a tree with all English-language synsets in WordNet:
+As a more realistic application, let's instantiate a tree with all English-language synsets in WordNet (117,659 classes, 20 levels of depth):
 
 ```python
 import torch
@@ -61,7 +61,7 @@ paths_down_tree = [
 tree = ClassTree(paths_down_tree)
 ```
 
-We'll map a batch with scores and labels to their respective ancestral paths:
+As before, we'll map a batch with scores and labels to their respective ancestral paths:
 
 ```python
 batch_sz = 100
