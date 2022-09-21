@@ -118,7 +118,7 @@ topk = (lev_dists * density).topk(k, largest=False, dim=-1)  # [batch_sz, k]
 topk_valid_preds = tree.P[topk.indices]                      # [batch_sz, k, tree.n_levels]
 ```
 
-Beam search over the paths of `P` with the highest joint predicted probability at each level of depth works well too. You can use any of the many implementations of beam search for PyTorch available online.
+Beam search over the paths of `P` with the highest joint predicted probability at each level of depth works pretty well too. You can use any of the many implementations of beam search for PyTorch available online.
 
 ## Citing
 
