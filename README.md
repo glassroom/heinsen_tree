@@ -32,7 +32,7 @@ tensor([[0,  3,  4],
 
 ## Installing
 
-`pip install -e git+https://github.com/glassroom/heinsen_tree#heinsen_tree`
+`pip install git+https://github.com/glassroom/heinsen_tree`
 
 Alternatively, you can download a single file to your project directory: [heinsen_tree.py](heinsen_tree/heinsen_tree.py).
 
