@@ -5,7 +5,7 @@ Reference implementation of "Tree Methods for Hierarchical Classification in Par
 An example is worth more than a thousand words:
 
 ```python
->>> # We'll instantiate this semantic tree:
+>>> # A tiny semantic tree:
 >>> #
 >>> #   pet --+-- 0 "dog" --+-- 2 "small dog"
 >>> #         |             |
@@ -16,13 +16,15 @@ An example is worth more than a thousand words:
 >>> #
 >>> tree = ClassTree([[0], [1], [0, 2], [0, 3], [0, 3, 4], [0, 3, 5]])
 >>>
->>> # Let's map a batch of four scores and labels to their ancestral paths:
+>>> # Map a batch of four scores and labels to their ancestral paths:
 >>> scores = torch.randn(4, 6)           # 4 predictions for 6 classes
 >>> labels = torch.tensor([4, 1, 5, 2])  # 4 targets
 >>>
 >>> scores_in_tree = tree.map_scores(scores)  # shape is [4, 3, 6]
 >>> labels_in_tree = tree.map_labels(labels)  # shape is [4, 3]
 >>>
+>>> print(tree.pad_value)
+tensor(-1)
 >>> print(labels_in_tree)
 tensor([[0,  3,  4],
         [1, -1, -1],
