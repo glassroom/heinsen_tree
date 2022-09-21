@@ -2,7 +2,7 @@
 
 Reference implementation of "Tree Methods for Hierarchical Classification in Parallel" (Heinsen, 2022), for transforming classification scores and labels, corresponding to given nodes in a semantic tree, to scores and labels corresponding to all nodes in the ancestral paths going down the tree to every given node -- efficiently, in parallel.
 
-An example is worth more than a thousand words:
+A toy example is worth more than a thousand words:
 
 ```python
 >>> # A tiny semantic tree:
