@@ -12,14 +12,14 @@ from heinsen_tree import ClassTree  # PyTorch module, can be incorporated in mod
 class_names = [synset.name() for synset in wordnet.all_eng_synsets()]
 class_name_to_id = { name: i for i, name in enumerate(class_names) }
 paths_down_tree = [
-    [class_name_to_id[synset.name()] for synset in wordnet.synset(class_name).hypernym_paths()[-1]]
+    [class_name_to_id[s.name()] for s in wordnet.synset(class_name).hypernym_paths()[-1]]
     for class_name in class_names
 ]
 tree = ClassTree(paths_down_tree)
 
-batch_sz = 100  # we'll map a batch of scores and labels to their respective ancestral paths
+batch_sz = 100  # we'll map a batch of scores and labels to their ancestral paths
 
-scores = torch.randn(batch_sz, tree.n_classes)           # normally would be predicted by a model
+scores = torch.randn(batch_sz, tree.n_classes)           # normally predicted by a model
 labels = torch.randint(tree.n_classes, size=[batch_sz])  # targets, each a class in the tree
 
 scores_in_tree = tree.map_scores(scores)  # shape is [batch_sz, tree.n_levels, tree.n_classes]
@@ -49,7 +49,7 @@ When training a model, filter out padding values to flatten mapped scores into a
 ```python
 import torch.nn.functional as F
 idx = (labels_in_tree != tree.pad_value)
-loss = F.cross_entropy(scores_in_tree[idx], labels_in_tree[idx])  # at all applicable levels of depth
+loss = F.cross_entropy(scores_in_tree[idx], labels_in_tree[idx])  # at all levels of depth
 ```
 
 ### Inference
@@ -58,20 +58,20 @@ At inference, you can compute naive probability distributions at each level of d
 
 ```python
 k = 5
-naive_guessed_paths = scores_in_tree.argmax(dim=-1)           # [batch_sz, tree.n_levels]
-is_different = (naive_guessed_paths[:, None, :] != tree.P)    # [batch_sz, tree.n_classes, tree.n_levels]
-is_not_padding = (tree.P != tree.pad_value)                   # [tree.n_classes, tree.n_levels] 
-lev_dists = (is_different & is_not_padding).sum(dim=-1)       # [batch_sz, tree.n_classes]
-topk_idxs = lev_dists.topk(k, largest=False, dim=-1).indices  # [batch_sz, k]
-topk_valid_preds = tree.P[topk_idxs]                          # [batch_sz, k, tree.n_levels]
+naive_preds = scores_in_tree.argmax(dim=-1)      # [batch_sz, tree.n_levels]
+is_diff = (naive_preds[:, None, :] != tree.P)    # [batch_sz, tree.n_classes, tree.n_levels]
+is_not_pad = (tree.P != tree.pad_value)          # [tree.n_classes, tree.n_levels] 
+lev_dists = (is_diff & is_not_pad).sum(dim=-1)   # [batch_sz, tree.n_classes]
+topk = lev_dists.topk(k, largest=False, dim=-1)  # k valid paths with smallest Lev dists
+topk_valid_preds = tree.P[topk.indices]          # [batch_sz, k, tree.n_levels]
 ```
 
-In practice, we have found that weighting Levenshtein distances by path density at each level of depth works well:
+In practice, we have found that weighting Levenshtein distances by path density at each level of depth works pretty well:
 
 ```python
-dens = is_not_padding.float().mean(dim=-2, keepdim=True)                        # [1, tree.n_levels]
-topk_weighted_idxs = (lev_dists * dens).topk(k, largest=False, dim=-1).indices  # [batch_sz, k]
-topk_weighted_valid_preds = tree.P[topk_weighted_idxs]                          # [batch_sz, k, tree.n_levels]
+density = is_not_padding.float().mean(dim=-2, keepdim=True)  # [1, tree.n_levels]
+topk = (lev_dists * density).topk(k, largest=False, dim=-1)  # [batch_sz, k]
+topk_valid_preds = tree.P[topk.indices]                      # [batch_sz, k, tree.n_levels]
 ```
 
 Standard beam search over the paths of `P` with the highest joint predicted probability at each level of depth works well too.
