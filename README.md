@@ -45,7 +45,7 @@ The only dependency is PyTorch.
 
 ## Sample Usage with WordNet
 
-Instantiate a tree with *all* English-language synsets in WordNet (117,659 classes, 20 levels of depth):
+Instantiate a tree with all English-language synsets in WordNet (117,659 classes, 20 levels of depth):
 
 ```python
 import torch
