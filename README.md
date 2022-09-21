@@ -45,12 +45,12 @@ The only dependency is PyTorch.
 
 ## Sample Usage with WordNet
 
-As a more realistic application, let's instantiate a tree with all English-language synsets in WordNet (117,659 classes, 20 levels of depth):
+Instantiate a tree with *all* English-language synsets in WordNet (117,659 classes, 20 levels of depth):
 
 ```python
 import torch
-from nltk.corpus import wordnet     # see nltk docs for installation
-from heinsen_tree import ClassTree  # PyTorch module, can be incorporated in models
+from nltk.corpus import wordnet  # see nltk docs for installation
+from heinsen_tree import ClassTree
 
 class_names = [synset.name() for synset in wordnet.all_eng_synsets()]
 class_name_to_id = { name: i for i, name in enumerate(class_names) }
