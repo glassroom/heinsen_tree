@@ -37,7 +37,7 @@ The only dependency is PyTorch.
 
 ## How Does it Work?
 
-`ClassTree` is a PyTorch module implementing the methods we propose in [the paper](https://arxiv.org) (Heinsen, 2022). These methods are algebraically expressible as tensor transformations that common software frameworks for machine learning can execute efficiently, particularly in hardware accelerators like GPUs and TPUs, incurring negligible computation and only modest fixed memory consumption over the footprint of data. Our methods enable efficient hierarchical classification in parallel.
+`ClassTree` is a PyTorch module implementing the methods we propose in our paper. These methods are algebraically expressible as tensor transformations that common software frameworks for machine learning, like PyTorch, can execute efficiently, particularly in hardware accelerators like GPUs and TPUs, incurring negligible computation and only modest fixed memory consumption over the footprint of data. Our methods enable efficient hierarchical classification in parallel.
 
 
 ## Tips for Training and Inference
@@ -66,15 +66,15 @@ topk = lev_dists.topk(k, largest=False, dim=-1)  # k valid paths with smallest L
 topk_valid_preds = tree.P[topk.indices]          # [batch_sz, k, tree.n_levels]
 ```
 
-In practice, we have found that weighting Levenshtein distances by path density at each level of depth works pretty well:
+In practice, weighting Levenshtein distances by path density at each level of depth works pretty well:
 
 ```python
-density = is_not_padding.float().mean(dim=-2, keepdim=True)  # [1, tree.n_levels]
+density = is_not_pad.float().mean(dim=-2, keepdim=True)      # [1, tree.n_levels]
 topk = (lev_dists * density).topk(k, largest=False, dim=-1)  # [batch_sz, k]
 topk_valid_preds = tree.P[topk.indices]                      # [batch_sz, k, tree.n_levels]
 ```
 
-Standard beam search over the paths of `P` with the highest joint predicted probability at each level of depth works well too.
+Beam search over the paths of `P` with the highest joint predicted probability at each level of depth works well too. You can use any of the many implementations of beam search for PyTorch available online.
 
 ## Citing
 
