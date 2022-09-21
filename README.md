@@ -83,7 +83,6 @@ Standard beam search over the paths of `P` with the highest joint predicted prob
     title={Tree Methods for Hierarchical Classification in Parallel},
     author={Franz A. Heinsen},
     year={2022},
-    eprint={####.#######},
     archivePrefix={arXiv},
     primaryClass={cs.LG}
 }
