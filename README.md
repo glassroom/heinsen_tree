@@ -5,7 +5,7 @@ Reference implementation of "Tree Methods for Hierarchical Classification in Par
 A toy example is worth more than a thousand words:
 
 ```python
->>> # A tiny semantic tree:
+>>> # A tiny semantic tree with 6 classes in 3 levels of depth:
 >>> #
 >>> #   pet --+-- 0 "dog" --+-- 2 "small dog"
 >>> #         |             |
