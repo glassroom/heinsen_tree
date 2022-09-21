@@ -54,8 +54,8 @@ class ClassTree(nn.Module):
         n_classes, n_levels = (len(paths_down_tree), max(len(path) for path in paths_down_tree))
         padded_paths = torch.tensor([path + [pad_value]*(n_levels - len(path)) for path in paths_down_tree])
         self.n_classes, self.n_levels = (n_classes, n_levels)
-        self.register_buffer('M', padded_paths.T != torch.arange(n_classes))  # [n_levels, n_classes] (matrix M in paper)
-        self.register_buffer('P', padded_paths)                               # [n_classes, n_levels] (matrix P in paper)
+        self.register_buffer('masks', padded_paths.T != torch.arange(n_classes))  # [n_levels, n_classes] (matrix M in paper)
+        self.register_buffer('paths', padded_paths)                               # [n_classes, n_levels] (matrix P in paper)
         self.register_buffer('pad_value', torch.tensor(pad_value))
         self.register_buffer('min_score', torch.tensor(min_score))
 
@@ -69,7 +69,7 @@ class ClassTree(nn.Module):
         level in the tree [..., n_levels, n_classes], masked as necessary with
         min_score, where '...' denotes zero or more preserved dimensions.
         """
-        return scores.unsqueeze(-2).masked_fill(self.M, self.min_score)  # equation (6) in paper
+        return scores.unsqueeze(-2).masked_fill(self.masks, self.min_score)  # equation (6) in paper
 
     def map_labels(self, labels):
         """
@@ -77,7 +77,7 @@ class ClassTree(nn.Module):
         of the tree [..., n_levels], padded as necessary with pad_value, where
         '...' denotes one or more preserved dimensions.
         """
-        return self.P[labels, :]  # equation (9) in paper
+        return self.paths[labels, :]  # equation (9) in paper
 
     def forward(self, scores):
         return self.map_scores(scores)
