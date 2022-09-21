@@ -2,28 +2,32 @@
 
 Reference implementation of "Tree Methods for Hierarchical Classification in Parallel" (Heinsen, 2022), for transforming classification scores and labels, corresponding to given nodes in a semantic tree, to scores and labels corresponding to all nodes in the ancestral paths going down the tree to every given node -- efficiently, in parallel.
 
-For example, here we apply our methods on a tree of all English-language synsets in WordNet 3.0, with 117,659 classes in 20 levels of depth, incurring negligible computation and consuming only a fixed ~0.04GB over the memory space occupied by data:
+An example is worth more than a thousand words:
 
 ```python
-import torch
-from nltk.corpus import wordnet     # see nltk docs for installation
-from heinsen_tree import ClassTree  # PyTorch module, can be incorporated in models
-
-class_names = [synset.name() for synset in wordnet.all_eng_synsets()]
-class_name_to_id = { name: i for i, name in enumerate(class_names) }
-paths_down_tree = [
-    [class_name_to_id[s.name()] for s in wordnet.synset(class_name).hypernym_paths()[-1]]
-    for class_name in class_names
-]  # ancestral paths ending at every class in the tree
-tree = ClassTree(paths_down_tree)
-
-batch_sz = 100  # we'll map a batch of scores and labels to their ancestral paths
-
-scores = torch.randn(batch_sz, tree.n_classes)           # normally predicted by a model
-labels = torch.randint(tree.n_classes, size=[batch_sz])  # targets, each a class in the tree
-
-scores_in_tree = tree.map_scores(scores)  # shape is [batch_sz, tree.n_levels, tree.n_classes]
-labels_in_tree = tree.map_labels(labels)  # shape is [batch_sz, tree.n_levels]
+>>> # We'll instantiate this semantic tree:
+>>> #
+>>> #   pet --+-- 0 "dog" --+-- 2 "small dog"
+>>> #         |             |
+>>> #         |             +-- 3 "big dog" --+-- 4 "happy big dog"
+>>> #         |                               |
+>>> #         |                               +-- 5 "angry big dog"
+>>> #         +-- 1 "other"
+>>> #
+>>> tree = ClassTree([[0], [1], [0, 2], [0, 3], [0, 3, 4], [0, 3, 5]])
+>>>
+>>> # Let's map a batch of four scores and labels to their ancestral paths:
+>>> scores = torch.randn(4, 6)           # 4 predictions for 6 classes
+>>> labels = torch.tensor([4, 1, 5, 2])  # 4 targets
+>>>
+>>> scores_in_tree = tree.map_scores(scores)  # shape is [4, 3, 6]
+>>> labels_in_tree = tree.map_labels(labels)  # shape is [4, 3]
+>>>
+>>> print(labels_in_tree)
+tensor([[0,  3,  4],
+        [1, -1, -1],
+        [0,  3,  5]]
+        [0,  2, -1]])
 ```
 
 ## Installing
@@ -39,6 +43,39 @@ The only dependency is PyTorch.
 
 `ClassTree` is a PyTorch module implementing the methods we propose in our paper. These methods are algebraically expressible as tensor transformations that common software frameworks for machine learning, like PyTorch, execute efficiently, particularly in hardware accelerators like GPUs and TPUs. Our methods enable efficient hierarchical classification in parallel. For details, see our paper.
 
+## Sample usage with WordNet
+
+As a more realistic application, let's instantiate a tree of all English-language synsets in WordNet 3.0, spanning 117,659 classes in 20 levels of depth:
+
+```python
+import torch
+from nltk.corpus import wordnet     # see nltk docs for installation
+from heinsen_tree import ClassTree  # PyTorch module, can be incorporated in models
+
+class_names = [synset.name() for synset in wordnet.all_eng_synsets()]
+class_name_to_id = { name: i for i, name in enumerate(class_names) }
+paths_down_tree = [
+    [class_name_to_id[s.name()] for s in wordnet.synset(class_name).hypernym_paths()[-1]]
+    for class_name in class_names
+]  # ancestral paths ending at every class in the tree
+tree = ClassTree(paths_down_tree)
+```
+
+We'll map a batch with 100 scores and labels to their respective ancestral paths:
+
+```python
+batch_sz = 100  # we'll map a batch of scores and labels to their ancestral paths
+
+scores = torch.randn(batch_sz, tree.n_classes)           # normally predicted by a model
+labels = torch.randint(tree.n_classes, size=[batch_sz])  # targets, each a class in the tree
+```
+
+Mapping the batch incurs negligible computation and consumes only the memory occupied by data:
+
+```python
+scores_in_tree = tree.map_scores(scores)  # shape is [batch_sz, tree.n_levels, tree.n_classes]
+labels_in_tree = tree.map_labels(labels)  # shape is [batch_sz, tree.n_levels]
+```
 
 ## Tips for Training and Inference
 
