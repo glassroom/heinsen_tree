@@ -14,7 +14,7 @@ class_name_to_id = { name: i for i, name in enumerate(class_names) }
 paths_down_tree = [
     [class_name_to_id[s.name()] for s in wordnet.synset(class_name).hypernym_paths()[-1]]
     for class_name in class_names
-]
+]  # ancestral paths ending at every class in the tree
 tree = ClassTree(paths_down_tree)
 
 batch_sz = 100  # we'll map a batch of scores and labels to their ancestral paths
