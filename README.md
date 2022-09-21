@@ -23,14 +23,11 @@ A toy example is worth more than a thousand words:
 >>> scores_in_tree = tree.map_scores(scores)  # shape is [4, 3, 6]
 >>> labels_in_tree = tree.map_labels(labels)  # shape is [4, 3]
 >>>
->>> print(labels_in_tree)
+>>> print(labels_in_tree)  # pad value is -1 by default
 tensor([[0,  3,  4],
         [1, -1, -1],
         [0,  3,  5]]
         [0,  2, -1]])
->>>
->>> print(tree.pad_value)
-tensor(-1)
 ```
 
 ## Installing
