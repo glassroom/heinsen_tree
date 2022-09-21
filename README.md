@@ -60,9 +60,9 @@ At inference, you can compute naive probability distributions at every level of 
 pred_probs = scores_in_tree.softmax(dim=-1)  # [batch_sz, tree.n_levels, tree.n_classes]
 ```
 
-We recommend that you map the classes predicted individually at each level of depth to *valid predicted paths*, by restricting the space of possible paths to only those that exist in the tree, stored by `ClassTree` in a PyTorch buffer named `P` (corresponding to matrix P in the paper).
+We recommend that you map naive predicted probabilities at each level of depth to *valid predicted paths*, by restricting the space of possible paths to only those that exist in the tree, stored by `ClassTree` in a PyTorch buffer named `P` (corresponding to matrix P in the paper).
 
-For example, here we predict the top k valid paths that have the smallest Levenshtein distance to each naively guessed path in the batch:
+For example, here we predict the top k valid paths that have the smallest Levenshtein distance to each naively predicted path in the batch:
 
 ```python
 k = 5
@@ -74,7 +74,7 @@ topk = lev_dists.topk(k, largest=False, dim=-1)  # k valid paths with smallest L
 topk_valid_preds = tree.P[topk.indices]          # [batch_sz, k, tree.n_levels]
 ```
 
-In practice, weighting Levenshtein distances by path density at each level of depth works pretty well:
+In practice, weighting Levenshtein distances by path density at each level of tree depth works pretty well:
 
 ```python
 density = is_not_pad.float().mean(dim=-2, keepdim=True)      # [1, tree.n_levels]
