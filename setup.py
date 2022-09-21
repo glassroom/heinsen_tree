@@ -8,7 +8,6 @@ setup(name='heinsen_tree',
     author='Franz A. Heinsen',
     author_email='franz@glassroom.com',
     license='MIT',
-    packages=['glassroom'],
-    requires_python='>=3.6.0',
+    packages=['heinsen_tree'],
     install_requires='torch',
     zip_safe=False)
