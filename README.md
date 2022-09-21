@@ -54,7 +54,15 @@ loss = F.cross_entropy(scores_in_tree[idx], labels_in_tree[idx])  # at all level
 
 ### Inference
 
-At inference, you can compute naive probability distributions at each level of depth with a Softmax, but we recommend instead that you map the top-scored classes at each level of depth to *only valid predicted paths*, by restricting the space of possible paths to only those that exist in the tree, stored by `ClassTree` in a PyTorch buffer named `P` (corresponding to matrix P in the paper). For example, here we predict the top k valid paths that have the smallest Levenshtein distance to each guessed path in the batch:
+At inference, you can compute naive probability distributions at every level of depth with a single Softmax:
+
+```python
+pred_probs = scores_in_tree.softmax(dim=-1)  # [batch_sz, tree.n_levels, tree.n_classes]
+```
+
+We recommend that you map the classes predicted individually at each level of depth to *valid predicted paths*, by restricting the space of possible paths to only those that exist in the tree, stored by `ClassTree` in a PyTorch buffer named `P` (corresponding to matrix P in the paper).
+
+For example, here we predict the top k valid paths that have the smallest Levenshtein distance to each naively guessed path in the batch:
 
 ```python
 k = 5
@@ -90,4 +98,4 @@ Beam search over the paths of `P` with the highest joint predicted probability a
 
 ## Notes
 
-We originally conceived and implemented these methods as part of our AI software, nicknamed Graham. Most of the original work we do at GlassRoom tends to be either proprietary in nature or tightly coupled to internal code, so we cannot share it with outsiders. In this case, however, we were able to isolate our code, clean it up, and release it as stand-alone open-source software without having to disclose any key intellectual property. Our code has been tested on Ubuntu Linux 20.04 with Python 3.8+. We hope others find our work and our code useful.
+We originally conceived and implemented these methods as part of our AI software, nicknamed Graham. Most of the original work we do at GlassRoom tends to be either proprietary in nature or tightly coupled to internal code, so we cannot share it with outsiders. In this case, however, we were able to isolate our code, clean it up, and release it as stand-alone open-source software without having to disclose any key intellectual property. Our code has been tested on Ubuntu Linux 20.04+ with Python 3.8+. We hope others find our work and our code useful.
