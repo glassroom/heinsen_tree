@@ -80,12 +80,12 @@ labels_in_tree = tree.map_labels(labels)  # shape is [batch_sz, tree.n_levels]
 
 ### Training
 
-When training a model, filter out padding values to flatten mapped scores into a matrix and mapped labels into a vector, enabling you to computing classification loss at all applicable levels of depth in parallel:
+When training a model, filter out padding values to flatten mapped scores into a matrix and mapped labels into a vector, enabling you to computing a classification loss (e.g., cross-entropy) at every applicable level of depth in parallel:
 
 ```python
 import torch.nn.functional as F
 idx = (labels_in_tree != tree.pad_value)
-loss = F.cross_entropy(scores_in_tree[idx], labels_in_tree[idx])  # at all levels of depth
+loss = F.cross_entropy(scores_in_tree[idx], labels_in_tree[idx])  # by level in parallel
 ```
 
 ### Inference
