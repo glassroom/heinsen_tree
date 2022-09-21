@@ -42,10 +42,10 @@ class ClassTree(nn.Module):
         >>> labels_in_tree = tree.map_labels(labels)  # shape is [4, 3]
         >>>
         >>> print(labels_in_tree)
-        >>> > tensor([[0,  3,  4],
-        >>> >         [1, -1, -1],
-        >>> >         [0,  3,  5]]
-        >>> >         [0,  2, -1]])
+        tensor([[0,  3,  4],
+                [1, -1, -1],
+                [0,  3,  5]]
+                [0,  2, -1]])
     """
     def __init__(self, paths_down_tree, pad_value=-1, min_score=float('-inf')):
         super().__init__()
