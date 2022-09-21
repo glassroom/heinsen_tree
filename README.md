@@ -96,7 +96,7 @@ At inference, you can compute naive probability distributions at every level of 
 pred_probs = scores_in_tree.softmax(dim=-1)  # [batch_sz, tree.n_levels, tree.n_classes]
 ```
 
-We recommend that you map naive predicted probabilities at each level of depth to *predicted paths that exist in the tree*, by restricting the space of possible paths to only those that are stored by `ClassTree` in a PyTorch buffer named `P` (corresponding to matrix P in the paper).
+We recommend that you map naive predicted probabilities at each level of depth to *paths that exist in the tree*, by restricting the space of allowed predictions to only those paths that are stored by `ClassTree` in a buffer named `P` (corresponding to matrix P in the paper).
 
 For example, here we predict the top k paths in the tree that have the smallest Levenshtein distance to each naively predicted path in the batch:
 
