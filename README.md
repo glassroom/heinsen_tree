@@ -23,13 +23,14 @@ A toy example is worth more than a thousand words:
 >>> scores_in_tree = tree.map_scores(scores)  # shape is [4, 3, 6]
 >>> labels_in_tree = tree.map_labels(labels)  # shape is [4, 3]
 >>>
->>> print(tree.pad_value)
-tensor(-1)
 >>> print(labels_in_tree)
 tensor([[0,  3,  4],
         [1, -1, -1],
         [0,  3,  5]]
         [0,  2, -1]])
+>>>
+>>> print(tree.pad_value)
+tensor(-1)
 ```
 
 ## Installing
@@ -47,7 +48,7 @@ The only dependency is PyTorch.
 
 ## Sample usage with WordNet
 
-As a more realistic application, let's instantiate a tree of all English-language synsets in WordNet 3.0, spanning 117,659 classes in 20 levels of depth:
+As a more realistic application, let's instantiate a tree with all English-language synsets in WordNet:
 
 ```python
 import torch
@@ -59,15 +60,14 @@ class_name_to_id = { name: i for i, name in enumerate(class_names) }
 paths_down_tree = [
     [class_name_to_id[s.name()] for s in wordnet.synset(class_name).hypernym_paths()[-1]]
     for class_name in class_names
-]  # ancestral paths ending at every class in the tree
+]  # ancestral paths ending at every class in the WordNet tree
 tree = ClassTree(paths_down_tree)
 ```
 
-We'll map a batch with 100 scores and labels to their respective ancestral paths:
+We'll map a batch with scores and labels to their respective ancestral paths:
 
 ```python
-batch_sz = 100  # we'll map a batch of scores and labels to their ancestral paths
-
+batch_sz = 100
 scores = torch.randn(batch_sz, tree.n_classes)           # normally predicted by a model
 labels = torch.randint(tree.n_classes, size=[batch_sz])  # targets, each a class in the tree
 ```
@@ -83,7 +83,7 @@ labels_in_tree = tree.map_labels(labels)  # shape is [batch_sz, tree.n_levels]
 
 ### Training
 
-When training a model, filter out padding values to flatten mapped scores into a matrix and mapped labels into a vector, enabling you to computing classification loss at all applicable levels of depth in parallel. In our example with the WordNet tree:
+When training a model, filter out padding values to flatten mapped scores into a matrix and mapped labels into a vector, enabling you to computing classification loss at all applicable levels of depth in parallel:
 
 ```python
 import torch.nn.functional as F
