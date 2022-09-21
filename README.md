@@ -43,7 +43,7 @@ The only dependency is PyTorch.
 
 `ClassTree` is a PyTorch module implementing the methods we propose in our paper. These methods are algebraically expressible as tensor transformations that common software frameworks for machine learning, like PyTorch, execute efficiently, particularly in hardware accelerators like GPUs and TPUs. Our methods enable efficient hierarchical classification in parallel. For details, see our paper.
 
-## Sample usage with WordNet
+## Sample Usage with WordNet
 
 As a more realistic application, let's instantiate a tree with all English-language synsets in WordNet:
 
