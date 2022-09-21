@@ -96,9 +96,9 @@ At inference, you can compute naive probability distributions at every level of 
 pred_probs = scores_in_tree.softmax(dim=-1)  # [batch_sz, tree.n_levels, tree.n_classes]
 ```
 
-We recommend that you map naive predicted probabilities at each level of depth to *valid predicted paths*, by restricting the space of possible paths to only those that exist in the tree, stored by `ClassTree` in a PyTorch buffer named `P` (corresponding to matrix P in the paper).
+We recommend that you map naive predicted probabilities at each level of depth to *predicted paths that exist in the tree*, by restricting the space of possible paths to only those that stored by `ClassTree` in a PyTorch buffer named `P` (corresponding to matrix P in the paper).
 
-For example, here we predict the top k valid paths that have the smallest Levenshtein distance to each naively predicted path in the batch:
+For example, here we predict the top k paths in the tree that have the smallest Levenshtein distance to each naively predicted path:
 
 ```python
 k = 5
@@ -106,20 +106,20 @@ naive_preds = scores_in_tree.argmax(dim=-1)      # [batch_sz, tree.n_levels]
 is_diff = (naive_preds[:, None, :] != tree.P)    # [batch_sz, tree.n_classes, tree.n_levels]
 lev_dists = is_diff.sum(dim=-1)                  # [batch_sz, tree.n_classes]
 topk = lev_dists.topk(k, largest=False, dim=-1)  # k valid paths with smallest Lev dists
-topk_valid_preds = tree.P[topk.indices]          # [batch_sz, k, tree.n_levels]
+topk_preds_in_tree = tree.P[topk.indices]        # [batch_sz, k, tree.n_levels]
 ```
 
-In practice, weighting Levenshtein distances by path density at each level of tree depth works pretty well:
+In practice, weighting Levenshtein distances by path density at each level of tree depth often works better:
 
 ```python
 is_node = (tree.P != tree.pad_value)                      # [tree.n_classes, tree.n_levels]
 density = is_node.float().mean(dim=-2, keepdim=True)      # [1, tree.n_levels]
 weighted_lev_dists = (is_diff * density).sum(dim=-1)      # [batch_sz, tree.n_classes]
 topk = weighted_lev_dists.topk(k, largest=False, dim=-1)  # [batch_sz, k]
-topk_valid_preds = tree.P[topk.indices]                   # [batch_sz, k, tree.n_levels]
+topk_preds_in_tree = tree.P[topk.indices]                 # [batch_sz, k, tree.n_levels]
 ```
 
-Beam search over the paths of `P` with the highest joint predicted probability at each level of depth works pretty well too. You can use any of the many implementations of beam search for PyTorch available online.
+Beam search over the paths of `P` with the highest joint predicted probability at each level of depth works well too. You can use any of the many implementations of beam search for PyTorch available online.
 
 ## Citing
 
