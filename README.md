@@ -1,8 +1,8 @@
 # heinsen_tree
 
-Reference implementation of "[Tree Methods for Hierarchical Classification in Parallel](https://arxiv.org/abs/2209.10288)" (Heinsen, 2022) in PyTorch. Makes hierarchical classification *easy*, and also *more efficient*, enabling greater scale.
+Reference implementation of "[Tree Methods for Hierarchical Classification in Parallel](https://arxiv.org/abs/2209.10288)" (Heinsen, 2022) in PyTorch.
 
-A toy example is worth more than a thousand words:
+Makes hierarchical classification *easy*, and also *more efficient*, enabling greater scale. See [here](#sample-usage-with-wordnet) for an example of hierarchical classification over a large semantic tree. To get you started, here's a toy example:
 
 ```python
 # A tiny semantic tree with 6 classes in 3 levels of depth:
@@ -30,8 +30,6 @@ labels_in_tree = tree.map_labels(labels)  # shape is [4, 3]
 idx = (labels_in_tree != tree.pad_value)  # shape is [4, 3]
 loss = torch.nn.functional.cross_entropy(scores_in_tree[idx], labels_in_tree[idx])
 ```
-
-See [here](#sample-usage-with-wordnet) for an example of hierarchical classification over a large semantic tree.
 
 
 ## Installing
