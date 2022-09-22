@@ -5,31 +5,30 @@ Reference implementation of "[Tree Methods for Hierarchical Classification in Pa
 A toy example is worth more than a thousand words:
 
 ```python
->>> # A tiny semantic tree with 6 classes in 3 levels of depth:
->>> #
->>> #   pet --+-- 0 "dog" --+-- 2 "small dog"
->>> #         |             |
->>> #         |             +-- 3 "big dog" --+-- 4 "happy big dog"
->>> #         |                               |
->>> #         |                               +-- 5 "angry big dog"
->>> #         +-- 1 "other"
->>> #
->>> import torch
->>> from heinsen_tree import ClassTree
->>> tree = ClassTree([[0], [1], [0, 2], [0, 3], [0, 3, 4], [0, 3, 5]])
->>>
->>> # Map a batch of four scores and labels to their ancestral paths:
->>> scores = torch.randn(4, 6)           # 4 predictions for 6 classes
->>> labels = torch.tensor([4, 1, 5, 2])  # 4 targets
->>>
->>> scores_in_tree = tree.map_scores(scores)  # shape is [4, 3, 6]
->>> labels_in_tree = tree.map_labels(labels)  # shape is [4, 3]
->>>
->>> print(labels_in_tree)  # pad value is -1 by default
-tensor([[0,  3,  4],
-        [1, -1, -1],
-        [0,  3,  5]]
-        [0,  2, -1]])
+# A tiny semantic tree with 6 classes in 3 levels of depth:
+#
+#   pet --+-- 0 "dog" --+-- 2 "small dog"
+#         |             |
+#         |             +-- 3 "big dog" --+-- 4 "happy big dog"
+#         |                               |
+#         |                               +-- 5 "angry big dog"
+#         +-- 1 "other"
+#
+import torch
+from heinsen_tree import ClassTree
+tree = ClassTree([[0], [1], [0, 2], [0, 3], [0, 3, 4], [0, 3, 5]])
+
+# Obtain a batch of four scores and labels:
+scores = torch.randn(4, 6)           # 4 predictions for 6 classes
+labels = torch.tensor([4, 1, 5, 2])  # 4 targets
+
+# Map them to their ancestral paths:
+scores_in_tree = tree.map_scores(scores)  # shape is [4, 3, 6]
+labels_in_tree = tree.map_labels(labels)  # shape is [4, 3]
+
+# Compute a classification loss at every applicable level, in parallel:
+idx = (labels_in_tree != tree.pad_value)  # shape is [4, 3]
+loss = torch.nn.functional.cross_entropy(scores_in_tree[idx], labels_in_tree[idx])
 ```
 
 ## Installing
@@ -85,9 +84,8 @@ labels_in_tree = tree.map_labels(labels)  # shape is [batch_sz, tree.n_levels]
 When training a model, filter out padding values to flatten mapped scores into a matrix and mapped labels into a vector, for computing a classification loss (e.g., cross-entropy) at every applicable level of depth in parallel:
 
 ```python
-import torch.nn.functional as F
-idx = (labels_in_tree != tree.pad_value)
-loss = F.cross_entropy(scores_in_tree[idx], labels_in_tree[idx])  # by level in parallel
+idx = (labels_in_tree != tree.pad_value)  # shape is [batch_sz, tree.n_levels]
+loss = torch.nn.functional.cross_entropy(scores_in_tree[idx], labels_in_tree[idx])
 ```
 
 ### Inference
