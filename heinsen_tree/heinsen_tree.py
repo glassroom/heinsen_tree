@@ -1,4 +1,5 @@
 # coding: utf-8
+from __future__ import annotations
 import torch
 import torch.nn as nn
 
@@ -44,7 +45,7 @@ class ClassTree(nn.Module):
         >>> idx = (labels_in_tree != tree.pad_value)  # shape is [4, 3]
         >>> loss = F.cross_entropy(scores_in_tree[idx], labels_in_tree[idx])
     """
-    def __init__(self, paths_down_tree, pad_value=-1, min_score=float('-inf')):
+    def __init__(self, paths_down_tree: list[list[int]], pad_value: int = -1, min_score: float = float('-inf')) -> None:
         super().__init__()
         assert all(label == path[-1] for label, path in enumerate(paths_down_tree)), \
             "Paths going down the tree must be sorted by class in ascending order, starting with the path to class 0."
@@ -56,11 +57,11 @@ class ClassTree(nn.Module):
         self.register_buffer('pad_value', torch.tensor(pad_value))
         self.register_buffer('min_score', torch.tensor(min_score))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         cfg_str = ', '.join(f'{s}={getattr(self, s)}' for s in 'n_classes n_levels pad_value min_score'.split())
         return '{}({})'.format(self._get_name(), cfg_str)
 
-    def map_scores(self, scores):
+    def map_scores(self, scores: torch.Tensor) -> torch.Tensor:
         """
         Map a tensor of scores [..., n_classes] to a tensor of scores for each
         level in the tree [..., n_levels, n_classes], masked as necessary with
@@ -68,7 +69,7 @@ class ClassTree(nn.Module):
         """
         return scores.unsqueeze(-2).masked_fill(self.masks, self.min_score)  # equation (6) in paper
 
-    def map_labels(self, labels):
+    def map_labels(self, labels: torch.Tensor) -> torch.Tensor:
         """
         Map a tensor of int labels [...] to their ancestral paths at each level
         of the tree [..., n_levels], padded as necessary with pad_value, where
@@ -76,5 +77,5 @@ class ClassTree(nn.Module):
         """
         return self.paths[labels, :]  # equation (9) in paper
 
-    def forward(self, scores):
+    def forward(self, scores: torch.Tensor) -> torch.Tensor:
         return self.map_scores(scores)
