@@ -63,7 +63,7 @@ paths_down_tree = [
 tree = ClassTree(paths_down_tree)
 ```
 
-As before, we'll map a batch with scores and labels to their respective ancestral paths:
+We'll map a batch with scores and labels to their respective ancestral paths:
 
 ```python
 batch_sz = 100
