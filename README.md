@@ -1,6 +1,6 @@
 # heinsen_tree
 
-Reference implementation of "[Tree Methods for Hierarchical Classification in Parallel](preprint.pdf)" (Heinsen, 2022), for transforming classification scores and labels, corresponding to given nodes in a semantic tree, to scores and labels corresponding to all nodes in the ancestral paths going down the tree to every given node -- efficiently, in parallel.
+Reference implementation of "[Tree Methods for Hierarchical Classification in Parallel](https://arxiv.org/abs/2209.10288)" (Heinsen, 2022), for transforming classification scores and labels, corresponding to given nodes in a semantic tree, to scores and labels corresponding to all nodes in the ancestral paths going down the tree to every given node -- efficiently, in parallel.
 
 A toy example is worth more than a thousand words:
 
@@ -126,12 +126,13 @@ Beam search over the paths in `tree.paths` with the highest joint predicted prob
 ## Citing
 
 ```
-@misc{heinsen_tree_2022,
-    title={Tree Methods for Hierarchical Classification in Parallel},
-    author={Franz A. Heinsen},
-    year={2022},
-    archivePrefix={arXiv},
-    primaryClass={cs.LG}
+@misc{heinsen2022tree,
+      title={Tree Methods for Hierarchical Classification in Parallel},
+      author={Franz A. Heinsen},
+      year={2022},
+      eprint={2209.10288},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
 }
 ```
 
