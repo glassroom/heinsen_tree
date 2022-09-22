@@ -1,6 +1,6 @@
 # heinsen_tree
 
-Reference implementation of "[Tree Methods for Hierarchical Classification in Parallel](https://arxiv.org/abs/2209.10288)" (Heinsen, 2022), for more efficient hierarchical classification at greater scale, i.e., over larger semantic trees.
+Reference implementation of "[Tree Methods for Hierarchical Classification in Parallel](https://arxiv.org/abs/2209.10288)" (Heinsen, 2022). Makes efficient hierarchical classification at greater scale, and over larger semantic trees, easy.
 
 A toy example is worth more than a thousand words:
 
@@ -43,6 +43,7 @@ The only dependency is PyTorch.
 ## How Does it Work?
 
 `ClassTree` is a PyTorch module implementing the methods we propose in our paper. These methods are algebraically expressible as tensor transformations that common software frameworks for machine learning, like PyTorch, execute efficiently, particularly in hardware accelerators like GPUs and TPUs. Our methods enable efficient hierarchical classification in parallel. For details, see our paper.
+
 
 ## Sample Usage with WordNet
 
