@@ -119,7 +119,7 @@ In practice, weighting Levenshtein distances by path density at each level of tr
 is_node = (tree.paths != tree.pad_value)                  # [tree.n_classes, tree.n_levels]
 density = is_node.float().mean(dim=-2, keepdim=True)      # [1, tree.n_levels]
 weighted_lev_dists = (is_diff * density).sum(dim=-1)      # [batch_sz, tree.n_classes]
-topk = weighted_lev_dists.topk(k, largest=False, dim=-1)  # [batch_sz, k]
+topk = weighted_lev_dists.topk(k, largest=False, dim=-1)  # k tree paths with smallest dists
 topk_preds_in_tree = tree.paths[topk.indices]             # [batch_sz, k, tree.n_levels]
 ```
 
