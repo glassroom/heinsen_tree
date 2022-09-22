@@ -71,7 +71,7 @@ scores = torch.randn(batch_sz, tree.n_classes)           # normally predicted by
 labels = torch.randint(tree.n_classes, size=[batch_sz])  # targets, each a class in the tree
 ```
 
-Mapping the batch incurs negligible computation and consumes only the memory occupied by mapped ddata:
+Mapping the batch incurs negligible computation and consumes only the memory occupied by mapped data:
 
 ```python
 scores_in_tree = tree.map_scores(scores)  # shape is [batch_sz, tree.n_levels, tree.n_classes]
