@@ -41,11 +41,8 @@ class ClassTree(nn.Module):
         >>> scores_in_tree = tree.map_scores(scores)  # shape is [4, 3, 6]
         >>> labels_in_tree = tree.map_labels(labels)  # shape is [4, 3]
         >>>
-        >>> print(labels_in_tree)  # pad value is -1 by default
-        tensor([[0,  3,  4],
-                [1, -1, -1],
-                [0,  3,  5]]
-                [0,  2, -1]])
+        >>> idx = (labels_in_tree != tree.pad_value)  # shape is [4, 3]
+        >>> loss = F.cross_entropy(scores_in_tree[idx], labels_in_tree[idx])
     """
     def __init__(self, paths_down_tree, pad_value=-1, min_score=float('-inf')):
         super().__init__()
