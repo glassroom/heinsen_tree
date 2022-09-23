@@ -2,7 +2,7 @@
 
 Reference implementation of "[Tree Methods for Hierarchical Classification in Parallel](https://arxiv.org/abs/2209.10288)" (Heinsen, 2022) in PyTorch.
 
-Makes hierarchical classification *easy*, and also *more efficient*, enabling greater scale. See [here](#sample-usage-with-wordnet) for an example of hierarchical classification over a large semantic tree. To get you started, here's a toy example:
+Makes hierarchical classification *easy*, and also *more efficient*, enabling you to tackle bigger problems. See [here](#sample-usage-with-wordnet) for an example of hierarchical classification over a large semantic tree. To get you started, here's a toy example:
 
 ```python
 # A tiny semantic tree with 6 classes in 3 levels of depth:
@@ -92,15 +92,17 @@ loss = torch.nn.functional.cross_entropy(scores_in_tree[idx], labels_in_tree[idx
 
 ### Inference
 
-At inference, you can compute naive probability distributions at every level of depth with a single Softmax:
+At inference, you can compute naive probability distributions at every level of depth with a single Softmax function, which runs efficiently because by default `scores_in_tree` is masked at each level of depth with `-inf` values, which PyTorch maps to zeros, without incurring floating-point computation:
 
 ```python
 pred_probs = scores_in_tree.softmax(dim=-1)  # [batch_sz, tree.n_levels, tree.n_classes]
 ```
 
-We recommend that you restrict the space of allowed predictions to *only paths that exist in the tree*, which `ClassTree` stores in a buffer named `paths` (corresponding to matrix P in the paper).
+#### Predicting Paths that Exist in the Tree
 
-For example, here we predict the top k paths in `tree.paths` that have the smallest Levenshtein distance to each naively predicted path in the batch. The possible classes at each level of depth in a path are fixed, so we can compute Levenshtein distance efficiently by summing elementwise differences between paths:
+We recommend that you restrict the space of allowed predictions to *paths that exist in the tree*, stored in `tree.paths`, a PyTorch buffer corresponding to matrix P in the paper. There are many techniques you can use for selecting the path or paths in `tree.paths` that most closely match the naively predicted probabilities.
+
+For example, here we predict the top k paths in `tree.paths` that have the smallest [Levenshtein distance](https://en.wikipedia.org/wiki/Levenshtein_distance) to each naively predicted path in the batch. The possible classes at each level of depth in a path are fixed, so we can compute Levenshtein distance efficiently by summing elementwise differences between paths:
 
 ```python
 k = 5
@@ -121,7 +123,8 @@ topk = weighted_lev_dists.topk(k, largest=False, dim=-1)  # k tree paths with sm
 topk_preds_in_tree = tree.paths[topk.indices]             # [batch_sz, k, tree.n_levels]
 ```
 
-Beam search over the paths in `tree.paths` with the highest joint predicted probability at each level of depth works well too. You can use any of the many implementations of beam search for PyTorch available online.
+[Beam search](https://en.wikipedia.org/wiki/Beam_search) over the paths in `tree.paths` with the highest joint predicted probability at each level of depth works well too. You can use any of the many implementations of beam search for PyTorch available online.
+
 
 ## Citing
 
