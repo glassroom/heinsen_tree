@@ -125,7 +125,7 @@ log_probs = torch.nn.functional.pad(
     log_probs, (0, 1), value=0)                    # [batch_sz, tree.n_classes + 1]
 
 # Distribute pred log-probs over all paths:
-path_log_probs = log_probs[:, paths]               # [tree.n_classes, tree.n_levels]
+path_log_probs = log_probs[:, paths]               # [batch_sz, tree.n_classes, tree.n_levels]
 
 # Predict the top k paths:
 topk = path_log_probs.sum(dim=-1).topk(k, dim=-1)  # k tree paths with highest joint log-probs
