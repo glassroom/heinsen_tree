@@ -113,7 +113,7 @@ k = 5
 
 # Replace pad values with a new temporary class:
 tmp_class = torch.tensor(tree.n_classes)           # follows (0, 1, ..., tree.n_classes - 1)
-is_pad = (tree.paths == tree.pad_value)            # [tree.n_levels, tree.n_classes]
+is_pad = (tree.paths == tree.pad_value)            # [tree.n_classes, tree.n_levels]
 paths = tree.paths.masked_fill(is_pad, tmp_class)  # [tree.n_classes, tree.n_levels]
 
 # Predict log-probs and flatten (unmask) them:
