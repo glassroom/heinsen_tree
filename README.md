@@ -105,7 +105,7 @@ We recommend that you restrict the space of allowed predictions to *paths that e
 
 #### Example: Using Beam Search to Make Predictions
 
-Here we use [beam search](https://en.wikipedia.org/wiki/Beam_search) to find the top k allowed paths in `tree.paths` that have the highest joint predicted probability. The number of allowed paths is fixed, so we can execute beam search in parallel over *all* allowed paths efficiently:
+Here we use [beam search](https://en.wikipedia.org/wiki/Beam_search) to find the top k allowed paths that have the highest joint predicted probability. The number of allowed paths is fixed, so we can execute beam search in parallel over *all* allowed paths efficiently:
 
 
 ```python
@@ -121,7 +121,8 @@ log_probs = scores_in_tree.log_softmax(dim=-1)     # [batch_sz, tree.n_levels, t
 log_probs = log_probs[:, ~tree.masks]              # [batch_sz, tree.n_classes]
 
 # Assign a pred log-prob of 0 to temporary class:
-log_probs = F.pad(log_probs, (0, 1), value=0)      # [batch_sz, tree.n_classes + 1]
+log_probs = torch.nn.functional.pad(
+    log_probs, (0, 1), value=0)                    # [batch_sz, tree.n_classes + 1]
 
 # Distribute pred log-probs over all paths:
 path_log_probs = log_probs[:, paths]               # [tree.n_classes, tree.n_levels]
