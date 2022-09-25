@@ -105,23 +105,23 @@ We recommend that you restrict the space of allowed predictions to *paths that e
 
 #### Example: Using Beam Search to Make Predictions
 
-Here we use [beam search](https://en.wikipedia.org/wiki/Beam_search) to find the top k allowed paths in `tree.paths` that have the highest joint predicted probability. The number of allowed paths is fixed, so we can execute beam search in parallel over *all* allowed paths efficiently. The trick is to replace padding values with a new, temporary class with predicted probability 1 (equivalent to a log-probability of 0):
+Here we use [beam search](https://en.wikipedia.org/wiki/Beam_search) to find the top k allowed paths in `tree.paths` that have the highest joint predicted probability. The number of allowed paths is fixed, so we can execute beam search in parallel over *all* allowed paths efficiently:
 
 
 ```python
 k = 5
 
+# Replace pad values with a new temporary class:
+tmp_class = torch.tensor(tree.n_classes)           # follows (0, 1, ..., tree.n_classes - 1)
+is_pad = (tree.paths == tree.pad_value)            # [tree.n_levels, tree.n_classes]
+paths = tree.paths.masked_fill(is_pad, tmp_class)  # [tree.n_classes, tree.n_levels]
+
 # Predict log-probs and flatten (unmask) them:
 log_probs = scores_in_tree.log_softmax(dim=-1)     # [batch_sz, tree.n_levels, tree.n_classes]
 log_probs = log_probs[:, ~tree.masks]              # [batch_sz, tree.n_classes]
 
-# Add new temp class with log-prob 0 everywhere:
+# Assign a pred log-prob of 0 to temporary class:
 log_probs = F.pad(log_probs, (0, 1), value=0)      # [batch_sz, tree.n_classes + 1]
-
-# Replace pad values with the new temp class:
-tmp_class = torch.tensor(tree.n_classes)           # follows (0, 1, ..., tree.n_classes - 1)
-is_pad = (tree.paths == tree.pad_value)            # [tree.n_levels, tree.n_classes]
-paths = tree.paths.masked_fill(is_pad, tmp_class)  # [tree.n_classes, tree.n_levels]
 
 # Distribute pred log-probs over all paths:
 path_log_probs = log_probs[:, paths]               # [tree.n_classes, tree.n_levels]
