@@ -133,7 +133,7 @@ topk_preds_in_tree = tree.paths[topk.indices]      # [batch_sz, k, tree.n_levels
 ```
 
 
-#### Example: Using Levensthtein Distance to Make Predictions
+#### Example: Using Levenshtein Distance to Make Predictions
 
 Here, we predict the top k allowed paths that have the smallest [Levenshtein distance](https://en.wikipedia.org/wiki/Levenshtein_distance) to each naively predicted path in the batch. The possible classes at each level of depth in a path are fixed, so we can compute Levenshtein distance efficiently by summing elementwise differences between paths:
 
