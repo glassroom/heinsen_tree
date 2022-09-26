@@ -43,7 +43,7 @@ The only dependency is PyTorch.
 
 ## How Does it Work?
 
-`ClassTree` is a PyTorch module implementing the methods we propose in our paper. These methods are algebraically expressible as tensor transformations that common software frameworks for machine learning, like PyTorch, execute efficiently, particularly in hardware accelerators like GPUs and TPUs. Our methods enable efficient hierarchical classification in parallel. For details, see our paper.
+`ClassTree` is a PyTorch module for mapping batches of classification scores and labels, corresponding to given nodes in a semantic tree, to scores and labels corresponding to all nodes in the ancestral paths going down the tree to every given node. The module has two methods, `map_scores` and `map_labels`, that map batches of scores and labels, respectively. These methods rely only on tensor transformations that common software frameworks for machine learning, like PyTorch, execute efficiently -- particularly in hardware accelerators like GPUs and TPUs. `ClassTree` enables efficient hierarchical classification in parallel. For details, see [here]((https://arxiv.org/abs/2209.10288)).
 
 
 ## Sample Usage with WordNet
@@ -161,6 +161,31 @@ weighted_lev_dists = (is_diff * density).sum(dim=-1)      # [batch_sz, tree.n_cl
 # Predict the top k paths:
 topk = weighted_lev_dists.topk(k, largest=False, dim=-1)  # k tree paths with smallest dists
 topk_preds_in_tree = tree.paths[topk.indices]             # [batch_sz, k, tree.n_levels]
+```
+
+
+## Usage as a Model Component
+
+You can use `ClassTree` as a component of models like any other PyTorch module. For convenience, the module's default `forward` method is a shim that calls `map_scores`. As an example, here we build and apply a linear model that classifies feature vectors into classes at all levels of ancestral depth in a given tree:
+
+```python
+class HierarchicalClassififier(nn.Module):
+
+    def __init__(self, n_features, paths_down_tree):
+        super().__init__()
+        self.linear = nn.Linear(n_features, len(paths_down_tree))
+        self.tree = ClassTree(paths_down_tree)
+
+    def forward(self, x):
+        x = self.linear(x)
+        x = self.tree(x)
+        return x
+
+batch_sz, n_features = (100, 1024)
+inputs = torch.randn(batch_sz, n_features)
+
+model = HierarchicalClassififier(n_features, paths_down_tree)  #  e.g., WordNet tree
+scores_in_tree = model(inputs)  # [batch_sz, model.tree.n_levels, model.tree.n_classes]
 ```
 
 
