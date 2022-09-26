@@ -169,7 +169,7 @@ topk_preds_in_tree = tree.paths[topk.indices]             # [batch_sz, k, tree.n
 You can use `ClassTree` as a component of models like any other PyTorch module. For convenience, the module's default `forward` method is a shim that calls `map_scores`. As an example, here we build and apply a linear model that classifies feature vectors into classes at all levels of ancestral depth in a given tree:
 
 ```python
-class HierarchicalClassififier(nn.Module):
+class HierarchicalClassifier(nn.Module):
 
     def __init__(self, n_features, paths_down_tree):
         super().__init__()
@@ -184,7 +184,7 @@ class HierarchicalClassififier(nn.Module):
 batch_sz, n_features = (100, 1024)
 inputs = torch.randn(batch_sz, n_features)
 
-model = HierarchicalClassififier(n_features, paths_down_tree)  #  e.g., WordNet tree
+model = HierarchicalClassifier(n_features, paths_down_tree)  #  e.g., WordNet tree
 scores_in_tree = model(inputs)  # [batch_sz, model.tree.n_levels, model.tree.n_classes]
 ```
 
