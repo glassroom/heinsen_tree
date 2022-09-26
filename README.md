@@ -43,7 +43,7 @@ The only dependency is PyTorch.
 
 ## How Does it Work?
 
-`ClassTree` is a PyTorch module for mapping batches of classification scores and labels, corresponding to given nodes in a semantic tree, to scores and labels corresponding to all nodes in the ancestral paths going down the tree to every given node. The module has two methods, `map_scores` and `map_labels`, that map batches of scores and labels, respectively. These methods rely only on tensor transformations that common software frameworks for machine learning, like PyTorch, execute efficiently -- particularly in hardware accelerators like GPUs and TPUs. `ClassTree` enables efficient hierarchical classification in parallel. For details, see [here]((https://arxiv.org/abs/2209.10288)).
+`ClassTree` is a PyTorch module for mapping batches of classification scores and labels, corresponding to given nodes in a semantic tree, to scores and labels corresponding to all nodes in the ancestral paths going down the tree to every given node. The module has two methods, `map_scores` and `map_labels`, that map batches of scores and labels, respectively. These methods rely only on tensor transformations that common software frameworks for machine learning, like PyTorch, execute efficiently -- particularly in hardware accelerators like GPUs and TPUs. `ClassTree` enables efficient hierarchical classification in parallel. For details, see [here](https://arxiv.org/abs/2209.10288).
 
 
 ## Sample Usage with WordNet
