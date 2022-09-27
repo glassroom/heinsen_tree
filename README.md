@@ -98,7 +98,7 @@ At inference, you can compute naive probability distributions at every level of 
 pred_probs = scores_in_tree.softmax(dim=-1)  # [batch_sz, tree.n_levels, tree.n_classes]
 ```
 
-These predicted distributions are naive because at each level of depth they are independent of each other, instead of conditional on the predicted distributions at previous levels, so the path of classes with highest predicted probabilities at each level may not exist in the tree -- e.g., `[0, 2, 4]` (a "dog" that is a "small dog" that is a "happy big dog") in our [first example](#heinsen_tree).
+These predicted distributions are naive because at each level of depth they are independent of each other, instead of conditional on the predicted distributions at previous levels. The path of classes with highest predicted probability at each level may not exist in the tree -- e.g., `[0, 2, 4]` ("dog" -> "small dog" -> "happy big dog") in our [toy example](#heinsen_tree).
 
 
 #### Predicting Paths that Exist in the Tree
