@@ -92,15 +92,18 @@ loss = torch.nn.functional.cross_entropy(scores_in_tree[idx], labels_in_tree[idx
 
 ### Inference
 
-At inference, you can compute naive probability distributions at every level of depth with a single Softmax function, which runs efficiently because by default `scores_in_tree` is masked at each level of depth with `-inf` values, which PyTorch maps to zeros, without incurring floating-point computation:
+At inference, you can compute naive probability distributions at every level of depth with a single Softmax function, which runs efficiently because by default `scores_in_tree` is masked at each level of depth with `-inf` values, which PyTorch maps to zeros without incurring floating-point computation:
 
 ```python
 pred_probs = scores_in_tree.softmax(dim=-1)  # [batch_sz, tree.n_levels, tree.n_classes]
 ```
 
+These predicted distributions are naive because at each level of depth they are independent of each other, instead of conditional on the predicted distributions at previous levels. If we predict at each level of depth the class with the highest predicted probability, we may obtain nonsensical predictions -- e.g., `[0, 2, 4]` (a "dog" that is a "small dog" that is a "happy big dog") in the sample tree [above](#heinsen_tree).
+
+
 #### Predicting Paths that Exist in the Tree
 
-We recommend that you restrict the space of allowed predictions to *paths that exist in the tree*, stored in `tree.paths`, a PyTorch buffer corresponding to matrix P in the paper. There are many techniques you can use for selecting the path or paths in `tree.paths` that most closely match the naively predicted probabilities.
+To prevent nonsensical predictions, restrict the space of allowed predictions to *paths that exist in the tree*, stored in `tree.paths`, a PyTorch buffer (corresponding to matrix P in the paper). Use any search method of your choice to find the path (or paths) in `tree.paths` that best match the naively predicted probabilities.
 
 
 #### Example: Using Beam Search to Make Predictions
@@ -135,7 +138,7 @@ topk_preds_in_tree = tree.paths[topk.indices]      # [batch_sz, k, tree.n_levels
 
 #### Example: Using Levenshtein Distance to Make Predictions
 
-Here, we predict the top k allowed paths that have the smallest [Levenshtein distance](https://en.wikipedia.org/wiki/Levenshtein_distance) to each naively predicted path in the batch. The possible classes at each level of depth in a path are fixed, so we can compute Levenshtein distance efficiently by summing elementwise differences between paths:
+Here, we predict the top k allowed paths that have the smallest [Levenshtein distance](https://en.wikipedia.org/wiki/Levenshtein_distance) to each naively predicted path in the batch. The possible classes at each level of depth in a path are fixed, so we can compute Levenshtein distance efficiently by summing elementwise differences between paths in parallel:
 
 ```python
 k = 5
