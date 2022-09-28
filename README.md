@@ -48,6 +48,10 @@ loss = torch.nn.functional.cross_entropy(scores_in_tree[idx], labels_in_tree[idx
 
 * [Usage as a Model Component](#usage-as-a-model-component)
 
+* [Citing](#citing)
+
+* [Notes](#notes)
+
 
 ## Installing
 
