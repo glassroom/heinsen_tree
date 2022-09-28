@@ -31,6 +31,23 @@ idx = (labels_in_tree != tree.pad_value)  # shape is [4, 3]
 loss = torch.nn.functional.cross_entropy(scores_in_tree[idx], labels_in_tree[idx])
 ```
 
+## Contents
+
+* [Installing](#installing)
+
+* [How Does it Work?](#how-does-it-work)
+
+* [Sample Usage with WordNet](#sample-usage-with-wordnet)
+
+* [Tips for Training](#tips-for-training)
+
+* [Tips for Inference](#tips-for-inference)
+  * [Predicting Paths that Exist in the Tree](#predicting-paths-that-exist-in-the-tree)
+  * [Example: Using Beam Search to Make Predictions](#example-using-beam-search-to-make-predictions)
+  * [Example: Using Levenshtein Distance to Make Predictions](#example-using-levenshtein-distance-to-make-predictions)
+
+* [Usage as a Model Component](#usage-as-a-model-component)
+
 
 ## Installing
 
@@ -79,9 +96,7 @@ scores_in_tree = tree.map_scores(scores)  # shape is [batch_sz, tree.n_levels, t
 labels_in_tree = tree.map_labels(labels)  # shape is [batch_sz, tree.n_levels]
 ```
 
-## Tips for Training and Inference
-
-### Training
+## Tips for Training
 
 When training a model, filter out padding values to flatten mapped scores into a matrix and mapped labels into a vector, for computing a classification loss (e.g., cross-entropy) at every applicable level of depth in parallel:
 
@@ -90,7 +105,7 @@ idx = (labels_in_tree != tree.pad_value)  # shape is [batch_sz, tree.n_levels]
 loss = torch.nn.functional.cross_entropy(scores_in_tree[idx], labels_in_tree[idx])
 ```
 
-### Inference
+## Tips for Inference
 
 At inference, you can compute naive probability distributions at every level of depth with a single Softmax function, which runs efficiently because by default `scores_in_tree` is masked at each level of depth with `-inf` values, which PyTorch maps to zeros without incurring floating-point computation:
 
@@ -101,12 +116,12 @@ pred_probs = scores_in_tree.softmax(dim=-1)  # [batch_sz, tree.n_levels, tree.n_
 These predicted distributions are naive because at each level of depth they are independent of each other, instead of conditional on the predicted distributions at previous levels. The path of classes with highest predicted probability at each level may not exist in the tree -- e.g., `[0, 2, 4]` ("dog" -> "small dog" -> "happy big dog") in our [toy example](#heinsen_tree).
 
 
-#### Predicting Paths that Exist in the Tree
+### Predicting Paths that Exist in the Tree
 
 We recommend that you restrict the space of allowed predictions to *paths that exist in the tree*, stored in `tree.paths`, a PyTorch buffer (corresponding to matrix P in the paper). Use any search method of your choice to find the path (or paths) in `tree.paths` that best match the naively predicted probabilities.
 
 
-#### Example: Using Beam Search to Make Predictions
+### Example: Using Beam Search to Make Predictions
 
 Here we use [beam search](https://en.wikipedia.org/wiki/Beam_search) to find the top k allowed paths that have the highest joint predicted probability. The number of allowed paths is fixed, so we can execute beam search in parallel over *all* allowed paths efficiently:
 
@@ -136,7 +151,7 @@ topk_preds_in_tree = tree.paths[topk.indices]      # [batch_sz, k, tree.n_levels
 ```
 
 
-#### Example: Using Levenshtein Distance to Make Predictions
+### Example: Using Levenshtein Distance to Make Predictions
 
 Here, we predict the top k allowed paths that have the smallest [Levenshtein distance](https://en.wikipedia.org/wiki/Levenshtein_distance) to each naively predicted path in the batch. The possible classes at each level of depth in a path are fixed, so we can compute Levenshtein distance efficiently by summing elementwise differences between paths in parallel:
 
