@@ -55,7 +55,9 @@ loss = torch.nn.functional.cross_entropy(scores_in_tree[idx], labels_in_tree[idx
 
 ## Installing
 
-`pip install git+https://github.com/glassroom/heinsen_tree`
+```
+pip install git+https://github.com/glassroom/heinsen_tree
+```
 
 Alternatively, you can download a single file to your project directory: [heinsen_tree.py](heinsen_tree/heinsen_tree.py).
 
