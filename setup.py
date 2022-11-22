@@ -2,7 +2,7 @@
 from setuptools import setup
 
 setup(name='heinsen_tree',
-    version='1.1',
+    version='1.1.0',
     description='Reference implementation of "Tree Methods for Hierarchical Classification in Parallel" (Heinsen, 2022).',
     url='https://github.com/glassroom/heinsen_tree',
     author='Franz A. Heinsen',
