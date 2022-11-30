@@ -1,8 +1,8 @@
 # heinsen_tree
 
-Reference implementation of "[Tree Methods for Hierarchical Classification in Parallel](https://arxiv.org/abs/2209.10288)" (Heinsen, 2022). These methods map batches of classification scores and labels, corresponding to given nodes in a semantic tree, to scores and labels corresponding to all nodes in the ancestral paths going down the tree to every given node -- efficiently, in parallel.
+Reference implementation of "[Tree Methods for Hierarchical Classification in Parallel](https://arxiv.org/abs/2209.10288)" (Heinsen, 2022), for mapping predicted scores and class labels, corresponding to given nodes in a semantic tree, to scores and labels corresponding to all nodes in the ancestral paths going down the tree to every given node -- in parallel.
 
-See [here](#sample-usage-with-wordnet) for an example of hierarchical classification over a large semantic tree. To get you started, here is a toy example:
+A toy example is helpful for conveying quickly what these methods do:
 
 ```python
 # A tiny semantic tree with 6 classes in 3 levels of depth:
@@ -22,7 +22,7 @@ tree = ClassTree([[0], [1], [0, 2], [0, 3], [0, 3, 4], [0, 3, 5]])
 scores = torch.randn(4, 6)           # 4 predictions for 6 classes
 labels = torch.tensor([4, 1, 5, 2])  # 4 targets
 
-# Map them to their ancestral paths:
+# Map scores and labels to their respective ancestral paths:
 scores_in_tree = tree.map_scores(scores)  # shape is [4, 3, 6]
 labels_in_tree = tree.map_labels(labels)  # shape is [4, 3]
 
@@ -30,6 +30,9 @@ labels_in_tree = tree.map_labels(labels)  # shape is [4, 3]
 idx = (labels_in_tree != tree.pad_value)  # shape is [4, 3]
 loss = torch.nn.functional.cross_entropy(scores_in_tree[idx], labels_in_tree[idx])
 ```
+
+For an example of hierarchical classification over a large semantic tree, see [here](#sample-usage-with-wordnet). For efficient, parallel methods to find the top k ancestral paths that have highest joint predicted probability, see [here](#tips-for-inference).
+
 
 ## Contents
 
