@@ -1,8 +1,8 @@
 # heinsen_tree
 
-Reference implementation of "[Tree Methods for Hierarchical Classification in Parallel](https://arxiv.org/abs/2209.10288)" (Heinsen, 2022) in PyTorch.
+Reference implementation of "[Tree Methods for Hierarchical Classification in Parallel](https://arxiv.org/abs/2209.10288)" (Heinsen, 2022). These methods map batches of classification scores and labels, corresponding to given nodes in a semantic tree, to scores and labels corresponding to all nodes in the ancestral paths going down the tree to every given node -- efficiently, in parallel.
 
-Makes hierarchical classification *easy*, and also *more efficient*, enabling you to tackle bigger problems. See [here](#sample-usage-with-wordnet) for an example of hierarchical classification over a large semantic tree. To get you started, here's a toy example:
+See [here](#sample-usage-with-wordnet) for an example of hierarchical classification over a large semantic tree. To get you started, here is a toy example:
 
 ```python
 # A tiny semantic tree with 6 classes in 3 levels of depth:
