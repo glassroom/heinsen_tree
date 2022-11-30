@@ -1,6 +1,6 @@
 # heinsen_tree
 
-Reference implementation of "[Tree Methods for Hierarchical Classification in Parallel](https://arxiv.org/abs/2209.10288)" (Heinsen, 2022), for mapping predicted scores and class labels, corresponding to given nodes in a semantic tree, to scores and labels corresponding to all nodes in the ancestral paths going down the tree to every given node -- in parallel.
+Reference implementation of "[Tree Methods for Hierarchical Classification in Parallel](https://arxiv.org/abs/2209.10288)" (Heinsen, 2022), for mapping a batch of scores and labels, corresponding to given nodes in a semantic tree, to scores and labels corresponding to all nodes in the ancestral paths going down the tree to every given node -- in parallel.
 
 A toy example is helpful for conveying quickly what these methods do:
 
@@ -46,7 +46,7 @@ For an example of hierarchical classification over a large semantic tree, see [h
 
 * [Tips for Inference](#tips-for-inference)
   * [Predicting Paths that Exist in the Tree](#predicting-paths-that-exist-in-the-tree)
-  * [Example: Using Beam Search to Make Predictions](#example-using-beam-search-to-make-predictions)
+  * [Example: Using Parallel Beam Search to Make Predictions](#example-using-parallel-beam-search-to-make-predictions)
   * [Example: Using Levenshtein Distance to Make Predictions](#example-using-levenshtein-distance-to-make-predictions)
 
 * [Usage as a Model Component](#usage-as-a-model-component)
@@ -130,7 +130,7 @@ These predicted distributions are naive because at each level of depth they are 
 We recommend that you restrict the space of allowed predictions to *paths that exist in the tree*, stored in `tree.paths`, a PyTorch buffer (corresponding to matrix P in the paper). Use any search method of your choice to find the path (or paths) in `tree.paths` that best match the naively predicted probabilities.
 
 
-### Example: Using Beam Search to Make Predictions
+### Example: Using Parallel Beam Search to Make Predictions
 
 Here we use [beam search](https://en.wikipedia.org/wiki/Beam_search) to find the top k allowed paths that have the highest joint predicted probability. The number of allowed paths is fixed, so we can execute beam search in parallel over *all* allowed paths efficiently:
 
