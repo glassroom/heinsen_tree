@@ -45,7 +45,6 @@ For an example of hierarchical classification over a large semantic tree, see [h
 * [Tips for Training](#tips-for-training)
 
 * [Tips for Inference](#tips-for-inference)
-  * [Predicting Paths that Exist in the Tree](#predicting-paths-that-exist-in-the-tree)
   * [Example: Using Parallel Beam Search to Make Predictions](#example-using-parallel-beam-search-to-make-predictions)
   * [Example: Using Levenshtein Distance to Make Predictions](#example-using-levenshtein-distance-to-make-predictions)
 
@@ -116,24 +115,16 @@ loss = torch.nn.functional.cross_entropy(scores_in_tree[idx], labels_in_tree[idx
 
 ## Tips for Inference
 
-At inference, you can compute naive probability distributions at every level of depth with a single Softmax function, which runs efficiently because by default `scores_in_tree` is masked at each level of depth with `-inf` values, which PyTorch maps to zeros without incurring floating-point computation:
+We recommend that you restrict the space of allowed predictions to *ancestral paths that exist in the tree*, stored in `tree.paths`, a PyTorch buffer (corresponding to matrix P in the paper), in two steps:
 
-```python
-pred_probs = scores_in_tree.softmax(dim=-1)  # [batch_sz, tree.n_levels, tree.n_classes]
-```
+1. Predict naive probability distributions at every level of depth with a single Softmax (or log-Softmax) function, which runs efficiently because by default `scores_in_tree` is masked with `-inf` values, which PyTorch maps to probability zero without incurring floating-point computation. These distributions are naive because at each level of depth they are independent of each other, instead of conditional on predictions at shallower levels.
 
-These predicted distributions are naive because at each level of depth they are independent of each other, instead of conditional on the predicted distributions at previous levels. The path of classes with highest predicted probability at each level may not exist in the tree -- e.g., `[0, 2, 4]` ("dog" -> "small dog" -> "happy big dog") in our [toy example](#heinsen_tree).
-
-
-### Predicting Paths that Exist in the Tree
-
-We recommend that you restrict the space of allowed predictions to *paths that exist in the tree*, stored in `tree.paths`, a PyTorch buffer (corresponding to matrix P in the paper). Use any search method of your choice to find the path (or paths) in `tree.paths` that best match the naively predicted probabilities.
+2. Use any method of your choice to select the ancestral path (or top k ancestral paths) in `tree.paths` that best match the naively predicted probabilities. Below, we show examples of two methods: parallel beam search and smallest Levenshtein distance.
 
 
 ### Example: Using Parallel Beam Search to Make Predictions
 
-Here we use [beam search](https://en.wikipedia.org/wiki/Beam_search) to find the top k allowed paths that have the highest joint predicted probability. The number of allowed paths is fixed, so we can execute beam search in parallel over *all* allowed paths efficiently:
-
+Here we use [beam search](https://en.wikipedia.org/wiki/Beam_search) to find the top k ancestral paths that have the highest joint predicted probability. The number of possible paths is finite, so we can efficiently execute beam search over *all* paths in parallel:
 
 ```python
 k = 5
@@ -143,7 +134,7 @@ tmp_class = torch.tensor(tree.n_classes)           # follows (0, 1, ..., tree.n_
 is_pad = (tree.paths == tree.pad_value)            # [tree.n_classes, tree.n_levels]
 paths = tree.paths.masked_fill(is_pad, tmp_class)  # [tree.n_classes, tree.n_levels]
 
-# Predict log-probs and flatten (unmask) them:
+# Predict naive log-probs and flatten (unmask) them:
 log_probs = scores_in_tree.log_softmax(dim=-1)     # [batch_sz, tree.n_levels, tree.n_classes]
 log_probs = log_probs[:, ~tree.masks]              # [batch_sz, tree.n_classes]
 
@@ -162,7 +153,7 @@ topk_preds_in_tree = tree.paths[topk.indices]      # [batch_sz, k, tree.n_levels
 
 ### Example: Using Levenshtein Distance to Make Predictions
 
-Here, we predict the top k allowed paths that have the smallest [Levenshtein distance](https://en.wikipedia.org/wiki/Levenshtein_distance) to each naively predicted path in the batch. The possible classes at each level of depth in a path are fixed, so we can compute Levenshtein distance efficiently by summing elementwise differences between paths in parallel:
+Here, we predict the top k ancestral paths that have the smallest [Levenshtein distance](https://en.wikipedia.org/wiki/Levenshtein_distance) to each naively predicted path in the batch. The possible classes at each level of depth are fixed, so we can compute Levenshtein distance efficiently by summing elementwise differences between paths in parallel:
 
 ```python
 k = 5
