@@ -68,7 +68,9 @@ The only dependency is PyTorch.
 
 ## How Does it Work?
 
-`ClassTree` is a PyTorch module for mapping batches of classification scores and labels, corresponding to given nodes in a semantic tree, to scores and labels corresponding to all nodes in the ancestral paths going down the tree to every given node. The module has two methods, `map_scores` and `map_labels`, that map batches of scores and labels, respectively. These methods rely only on tensor transformations that common software frameworks for machine learning, like PyTorch, execute efficiently -- particularly in hardware accelerators like GPUs and TPUs. `ClassTree` enables efficient hierarchical classification in parallel. For details, see [here](https://arxiv.org/abs/2209.10288).
+`ClassTree` is a PyTorch module for mapping batches of classification scores and labels, corresponding to given nodes in a semantic tree, to scores and labels corresponding to all nodes in the ancestral paths going down the tree to every given node. The module has two methods, `map_scores` and `map_labels`, that map batches of scores and labels, respectively. These methods rely only on tensor transformations that common software frameworks for machine learning, like PyTorch, execute efficiently -- particularly in hardware accelerators like GPUs and TPUs. `ClassTree` enables efficient hierarchical classification in parallel.
+
+For details, see [the paper](https://arxiv.org/abs/2209.10288).
 
 
 ## Sample Usage with WordNet
@@ -106,7 +108,7 @@ labels_in_tree = tree.map_labels(labels)  # shape is [batch_sz, tree.n_levels]
 
 ## Tips for Training
 
-When training a model, filter out padding values to flatten mapped scores into a matrix and mapped labels into a vector, for computing a classification loss (e.g., cross-entropy) at every applicable level of depth in parallel:
+When training, filter out padding values to flatten mapped scores into a matrix and mapped labels into a vector, for computing classification loss (e.g., cross-entropy) at every applicable level of depth in parallel:
 
 ```python
 idx = (labels_in_tree != tree.pad_value)  # shape is [batch_sz, tree.n_levels]
@@ -117,7 +119,7 @@ loss = torch.nn.functional.cross_entropy(scores_in_tree[idx], labels_in_tree[idx
 
 We recommend that you restrict the space of allowed predictions to *ancestral paths that exist in the tree*, stored in `tree.paths`, a PyTorch buffer (corresponding to matrix P in the paper), in two steps:
 
-1. Predict naive probability distributions at every level of depth with a single Softmax (or log-Softmax) function, which runs efficiently because by default `scores_in_tree` is masked with `-inf` values, which PyTorch maps to probability zero without incurring floating-point computation. These distributions are naive because at each level of depth they are independent of each other, instead of conditional on predictions at shallower levels.
+1. Predict naive probability distributions at every level of depth with a single Softmax or log-Softmax (e.g., `scores_in_tree.softmax(dim=-1)`), which runs efficiently because by default `scores_in_tree` is masked with `-inf` values, ignored by PyTorch. The distributions are naive because at each level of depth they are independent of each other, instead of conditional on predictions at shallower levels.
 
 2. Use any method of your choice to select the ancestral path (or top k ancestral paths) in `tree.paths` that best match the naively predicted probabilities. Below, we show examples of two methods: parallel beam search and smallest Levenshtein distance.
 
@@ -222,4 +224,8 @@ scores_in_tree = model(inputs)  # [batch_sz, model.tree.n_levels, model.tree.n_c
 
 ## Notes
 
-We originally conceived and implemented these methods as part of our AI software, nicknamed Graham. Most of the original work we do at GlassRoom tends to be either proprietary in nature or tightly coupled to internal code, so we cannot share it with outsiders. In this case, however, we were able to isolate our code, clean it up, and release it as stand-alone open-source software without having to disclose any key intellectual property. Our code has been tested on Ubuntu Linux 20.04+ with Python 3.8+. We hope others find our work and our code useful.
+We originally conceived and implemented these methods as part of our AI software, nicknamed Graham. Most of the original work we do at GlassRoom tends to be either proprietary in nature or tightly coupled to internal code, so we cannot share it with outsiders. In this case, however, we were able to isolate our code, clean it up, and release it as stand-alone open-source software without having to disclose any key intellectual property.
+
+Our code has been tested on Ubuntu Linux 20.04+ with Python 3.8+.
+
+We hope others find our work and our code useful.
