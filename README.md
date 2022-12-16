@@ -119,7 +119,7 @@ loss = torch.nn.functional.cross_entropy(scores_in_tree[idx], labels_in_tree[idx
 
 We recommend that you restrict the space of allowed predictions to *ancestral paths that exist in the tree*, stored in `tree.paths`, a PyTorch buffer (corresponding to matrix P in the paper), in two steps:
 
-1. Predict naive probability distributions at every level of depth with a single Softmax or log-Softmax (e.g., `scores_in_tree.softmax(dim=-1)`), which runs efficiently because by default `scores_in_tree` is masked with `-inf` values, ignored by PyTorch. The distributions are naive because at each level of depth they are independent of each other, instead of conditional on predictions at shallower levels.
+1. Predict naive probability distributions at every level of depth with a single Softmax or log-Softmax (e.g., `tree.map_scores(scores).softmax(dim=-1)`), which runs efficiently because by default the scores are masked with `-inf` values, ignored by PyTorch. The distributions are naive because at each level of depth they are independent of each other, instead of conditional on predictions at shallower levels.
 
 2. Use any method of your choice to select the ancestral path (or top k ancestral paths) in `tree.paths` that best match the naively predicted probabilities. Below, we show examples of two methods: parallel beam search and smallest Levenshtein distance.
 
@@ -129,6 +129,9 @@ We recommend that you restrict the space of allowed predictions to *ancestral pa
 Here we use [beam search](https://en.wikipedia.org/wiki/Beam_search) to find the top k ancestral paths that have the highest joint predicted probability. The number of possible paths is finite, so we can efficiently execute beam search over *all* paths in parallel:
 
 ```python
+# Map predicted scores to tree levels:
+scores_in_tree = tree.map_scores(scores)           # [batch_sz, tree.n_levels, tree.n_classes]
+
 k = 5
 
 # Replace pad values with a new temporary class:
@@ -144,7 +147,7 @@ log_probs = log_probs[:, ~tree.masks]              # [batch_sz, tree.n_classes]
 log_probs = torch.nn.functional.pad(
     log_probs, (0, 1), value=0)                    # [batch_sz, tree.n_classes + 1]
 
-# Distribute pred log-probs over all paths:
+# Distribute pred log-probs over *all* tree paths:
 path_log_probs = log_probs[:, paths]               # [batch_sz, tree.n_classes, tree.n_levels]
 
 # Predict the top k paths:
@@ -158,6 +161,9 @@ topk_preds_in_tree = tree.paths[topk.indices]      # [batch_sz, k, tree.n_levels
 Here, we predict the top k ancestral paths that have the smallest [Levenshtein distance](https://en.wikipedia.org/wiki/Levenshtein_distance) to each naively predicted path in the batch. The possible classes at each level of depth are fixed, so we can compute Levenshtein distance efficiently by summing elementwise differences between paths in parallel:
 
 ```python
+# Map predicted scores to tree levels:
+scores_in_tree = tree.map_scores(scores)           # [batch_sz, tree.n_levels, tree.n_classes]
+
 k = 5
 
 # Compute all Levenshtein distances:
