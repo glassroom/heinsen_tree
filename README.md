@@ -1,6 +1,6 @@
 # heinsen_tree
 
-Reference implementation of "[Tree Methods for Hierarchical Classification in Parallel](https://arxiv.org/abs/2209.10288)" (Heinsen, 2022), for mapping a batch of scores and labels, corresponding to given nodes in a semantic tree, to scores and labels corresponding to all nodes in the ancestral paths going down the tree to every given node -- in parallel.
+Reference implementation of "Tree Methods for Hierarchical Classification in Parallel](https://arxiv.org/abs/2209.10288)" (Heinsen, 2022), for mapping a batch of scores and labels, corresponding to given nodes in a semantic tree, to scores and labels corresponding to all nodes in the ancestral paths going down the tree to every given node -- relying only on tensor transformations that execute efficiently in highly parallel hardware accelerators (e.g., GPUs, TPUs).
 
 A toy example is helpful for conveying quickly what these methods do:
 
